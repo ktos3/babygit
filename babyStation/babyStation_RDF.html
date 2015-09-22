@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=SHIFT-JIS">
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+<script type="text/javascript" src="http://lodcu.cs.chubu.ac.jp:8080/SparqlEPCU/RDFmgr/rdfmgr-2.0.0.js"></script>
+
+<script type="text/javascript">
+	//インスタンスの宣言
+	var rdfmgr = new RDFmgr("babyStation");//rdfserver_project);
+	function getErrorMsg(eType,eMsg,eInfo){
+		alert(eMsg+"\n\n"+eInfo);
+	}
+
+$(function(){
+
+	function SparqlSend(){
+		var stext = "select * where {?s ?p ?o . }";//$("#sparql").val();
+
+		//executeSparql()でSPARQL検索を行う
+		rdfmgr.executeSparql({
+			sparql: stext,
+			inference: false,
+			success: maketable,
+			error: getErrorMsg
+		});
+	}
+
+	//SparqlEPCUから受け取ったJSONデータをイテレータを使用して取り出し表作成
+	function maketable(re){
+		$("#disp").empty();
+		var str = new String("<tr>");
+		for(var i=0; i<re.getKeyListLength();i++){
+			str += "<td>"+re.getKey(i)+"</td>";
+		}
+		str += "</tr>";
+		while(re.next()){
+			for(var i=0; i < re.getLength();i++){
+				str += "<td>"+re.getValue(i)+"</td>";
+			}
+			str += "</tr>";
+		}
+		$("#disp").append(str);
+	}
+
+	SparqlSend();
+
+});
+
+</script>
+
+<style>
+ table {
+ 	border-collapse: collapse;
+ }
+
+ table * {
+  	border: solid 1px black;
+ }
+</style>
+
+</head>
+<body>
+	<h1>RDF検索</h1>
+	<table border=1 id="disp"></table>
+
+</body>
+</html>

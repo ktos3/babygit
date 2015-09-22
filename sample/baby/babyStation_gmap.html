@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>赤ちゃん駅検索</title>
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+	<link rel="stylesheet" type="text/css" href="jquery-easyui-1.3.3/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="jquery-easyui-1.3.3/themes/icon.css">
+	<link rel="stylesheet" type="text/css" href="jquery-easyui-1.3.3/demo/demo.css">
+	<script type="text/javascript" src="js000/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="http://lodcu.cs.chubu.ac.jp:8080/SparqlEPCU/RDFmgr/rdfmgr-2.0.0.js"></script>
+
+	<script type="text/javascript" src="js000/markerclusterer_compiled.js"></script>
+	<script type="text/javascript" src="js000/script2.js"></script>
+	<script type="text/javascript" src="js000/linkdata_map.js"></script>
+
+<style type="text/css">
+      body {
+      font-size: 100%;
+      color: #000000;
+      }
+      span.sample1 {
+       font-size: 9ex;
+       color: white;
+       }
+    </style>
+</head>
+<body class="easyui-layout" >
+
+
+<!-- ファイル読み込みエリア -->
+<div id="p" class="easyui-panel" title="プロジェクトとプロパティの指定"
+                                     style="height:125px;padding:20px;background:#eeeeee;"
+                                     data-options="iconCls:'icon-save',closable:false, collapsible:true,collapsed:true,minimizable:false,maximizable:false">
+
+<table align="left">
+	<tr>
+		<td>プロジェクトID:</td>
+	</tr>
+	<tr>
+		<td><input id="setting_id" class="easyui-validatebox" type="text" name="name" data-options="required:true" value="babyStation"></input></td>
+	</tr>
+</table>
+<!--
+<table align="left">
+	<tr>
+		<td>表示タイプ:未実装なんでもあり</td>
+	</tr>
+	<tr>
+		<td>
+			<select class="easyui-combobox" name="state" style="width:150px;">
+				<option value="">表示タイプを選択</option>
+				<option value="GMAP">地図タイプ</option>
+				<option value="GLAPH">グラフタイプ</option>
+				<option value="TABLE">表タイプ</option>
+			</select>
+		</td>
+	</tr>
+</table>
+  -->
+<table align="left">
+	<tr>
+		<td>名前のプロパティ:</td>
+	</tr>
+	<tr>
+		<td><input id="setting_name" class="easyui-validatebox" type="text" name="name" data-options="required:true" value="場所名"></input></td>
+	</tr>
+</table>
+<table align="left">
+	<tr>
+		<td>緯度のプロパティ:</td>
+	</tr>
+	<tr>
+		<td><input id="setting_lat" class="easyui-validatebox" type="text" name="lat" data-options="required:true"value="geo:lat" ></input></td>
+	</tr>
+</table>
+<table align="left">
+	<tr>
+		<td>経度のプロパティ:</td>
+	</tr>
+	<tr>
+		<td><input id="setting_long" class="easyui-validatebox" type="text" name="long" data-options="required:true" value="geo:long"></input></td>
+	</tr>
+</table>
+<br>
+	<div style="padding:5px;">
+		<a href="#" class="easyui-linkbutton" onclick="queryRead2()">プロジェクトを使用する</a>
+	</div>
+<br><br>
+
+</div>
+
+
+<!--
+<table >
+	<tr>
+		<td>メニュー:</td>
+	</tr>
+	<tr>
+		<td>
+			<select  id="qsel5" name="queryselect"  onChange="showQueryResult()" >
+				<option value="0">選択してください</option>
+			</select>
+		</td>
+	</tr>
+</table>
+-->
+ <div style="margin:5px 0;"></div>
+
+
+
+
+
+<!-- 北南西東　ここから -->
+	<div class="easyui-layout"style="height:90%;" >
+
+<!--northエリア　　　ここから  -->
+	<div data-options="region:'north',border:false" style="height:80px;background:#138388;">
+<span class = "sample1" color = "white">LOD　Browser</span>
+	</div>
+
+
+ <!-- westエリア　　　ここから -->
+	<div data-options="region:'west',split:true,title:'クラス'" style="width:250px;height:90%;">
+<form action="#" name="form1">
+
+
+	<table id="dg" class="easyui-datagrid"  style=""
+			data-options="rownumbers:false,singleSelect:false,fitColumns:true,autoRowHeight:true">
+		<thead>
+			<tr>
+				<th data-options="field:'ck',checkbox:true"></th>
+				<th data-options="field:'classname',width:160">複数選択時初期化</th>
+
+			</tr>
+		</thead>
+	</table>
+	<div style="margin:10px 0;">
+		<span>Selection Mode: </span>
+		<select onchange="one_for_all_all_for_one(this)">
+			<option value="1">複数を選択可能にする</option>
+			<option value="0">一つだけ選択する</option>
+		</select><br/>
+<!-- 		全選択ありなし(未実装動くけど): <input type="checkbox" checked onchange="$('#dg').datagrid({selectOnCheck:$(this).is(':checked')})"><br/>
+		チェックボックス外でもチェック可不可: <input type="checkbox" checked onchange="$('#dg').datagrid({checkOnSelect:$(this).is(':checked')})">-->
+	</div>
+</form>
+</div>
+
+
+ <!-- eastエリア　　　ここから -->
+	<div id="cc" data-options="region:'east',split:true,collapsed:false,title:'インスタンス'" style="width:200px;">
+<form action="&" name="form2">
+<select id="qsel3" style="width:99%;height:100%;"size="36">
+
+</select>
+</form>
+
+	</div>
+
+
+ <!-- southエリアここから -->
+
+<!-- <div data-options="region:'south',border:false" style="height:170%;background:#138388;padding:10px">
+
+<div id="tt" class="easyui-tabs" style="height:150px;"data-options="tabPosition:'left'">
+		<div title="SPARQL" data-options="iconCls:'icon-help',closable:false" style="padding:10px">
+		最後に使用したSPARQL構文が表示されます<br>
+			<textarea rows="1" cols="100" id="query33"> </textarea>
+		</div>
+		<div title="Help" data-options="iconCls:'icon-help',closable:false" style="padding:10px">
+			プロジェクトIDを指定して、「プロジェクトを使用する」を押してください。<br/><br/>
+			押すと左カラムに登録されているプロジェクトのクラスが表示されます。<br/>
+			チェックボックスにチェックを入れると、データが緯度経度を持っていれば地図にマーカーがマッピングされます。<br/>
+			そうでなければ表形式にデータが出力されます。<br/>
+<br/>
+			地図に表示された場合クラスの選択がされると右カラムに名前プロパティが表示されます。<br/>
+			名前プロパティをクリックすると、その情報ウィンドウが表示されます。
+		</div>
+
+
+	</div>
+</div>-->
+<!-- centerエリア         ここから -->
+ <!-- southエリア<div id="gmap"  region="center" title="Map"style=" height: 370px; border: 1px solid Gray;"></div>ここから -->
+	<div id="gmap"  region="center" title="LOD_Browser"style=" height: 100px; border: 1px solid Gray;">
+
+			プロジェクトIDを指定して、「プロジェクトを使用する」を押してください。<br/><br/><br/><br/>
+			押すと左カラムに登録されているプロジェクトのクラスが表示されます。<br/>
+			チェックボックスにチェックを入れると、データが緯度経度を持っていれば地図にマーカーがマッピングされます。<br/>
+			そうでなければ表形式にデータが出力されます。<br/>
+<br/>
+			地図に表示された場合クラスの選択がされると右カラムに名前プロパティが表示されます。<br/>
+			名前プロパティをクリックすると、その情報ウィンドウが表示されます。<br/>
+
+
+		</div>
+	</div>
+
+
+
+</body>
+</html>

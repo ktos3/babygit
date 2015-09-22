@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&v=3"></script>
+	<script type="text/javascript">
+		var stationList = [
+			{"latlng":[35.681382,139.766084],name:"東京駅"},
+			{"latlng":[35.630152,139.74044],name:"品川駅"},
+			{"latlng":[35.507456,139.617585],name:"新横浜駅"},
+			{"latlng":[35.25642,139.154904],name:"小田原駅"},
+			{"latlng":[35.103217,139.07776],name:"熱海駅"},
+			{"latlng":[35.127152,138.910627],name:"三島駅"},
+			{"latlng":[35.142015,138.663382],name:"新富士駅"},
+			{"latlng":[34.97171,138.38884],name:"静岡駅"},
+			{"latlng":[34.769758,138.014928],name:"掛川駅"},
+			{"latlng":[34.703741,137.734442],name:"浜松駅"},
+			{"latlng":[34.762811,137.381651],name:"豊橋駅"},
+			{"latlng":[34.96897,137.060662],name:"三河安城駅"},
+			{"latlng":[35.170694,136.881637],name:"名古屋駅"},
+			{"latlng":[35.315705,136.685593],name:"岐阜羽島駅"},
+			{"latlng":[35.314188,136.290488],name:"米原駅"},
+			{"latlng":[34.985458,135.757755],name:"京都駅"},
+			{"latlng":[34.73348,135.500109],name:"新大阪駅"}
+		];
+		function initialize() {
+			//地図を表示
+			var mapDiv = document.getElementById("map_canvas");
+			var mapCanvas = new google.maps.Map(mapDiv);
+			mapCanvas.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+
+			//マーカーを表示・非表示させるためのプロパティをセット
+			mapCanvas.set("markersVisible", true);
+			var checkBox = document.getElementById("marker_visibile");
+			google.maps.event.addDomListener(checkBox, "click", function(){
+				mapCanvas.set("markersVisible", Boolean(checkBox.checked));
+			});
+
+			//地図上にマーカーを配置していく
+			var bounds = new google.maps.LatLngBounds();
+			var station, i, latlng;
+			for (i in stationList) {
+				//マーカーを作成
+				station = stationList[i];
+				latlng = new google.maps.LatLng(station.latlng[0], station.latlng[1]);
+				bounds.extend(latlng);
+				var marker = createMarker(
+					mapCanvas, latlng, station.name
+				);
+
+				//サイドバーのボタンを作成
+				createMarkerButton(marker);
+			}
+			//マーカーが全て収まるように地図の中心とズームを調整して表示
+			mapCanvas.fitBounds(bounds);
+		}
+		function createMarker(map, latlng, title) {
+			//マーカーを作成
+			var marker = new google.maps.Marker({
+				position : latlng,
+				map : map,
+				title : title
+			});
+
+			//情報ウィンドウを作成
+			var infoWnd = new google.maps.InfoWindow({
+				content : "<strong>" + title + "</strong>"
+			});
+
+			//マーカーがクリックされたら、情報ウィンドウを表示
+			google.maps.event.addListener(marker, "click", function(){
+				infoWnd.open(map, marker);
+			});
+
+			//marker.visible を mapCanvas.markersVisible に連動する
+			marker.bindTo("visible", marker.getMap(), "markersVisible");
+			return marker;
+		}
+		function createMarkerButton(marker) {
+			//サイドバーにマーカ一覧を作る
+			var ul = document.getElementById("marker_list");
+			var li = document.createElement("li");
+			var title = marker.getTitle();
+			li.innerHTML = title;
+			ul.appendChild(li);
+
+			//サイドバーがクリックされたら、マーカーを擬似クリック
+			google.maps.event.addDomListener(li, "click", function(){
+				google.maps.event.trigger(marker, "click");
+			});
+		}
+		window.onload = initialize;
+	</script>
+
+</head>
+<body class="code2-3-2">
+	<div id="map_canvas"></div>
+	<div id="side_bar">
+		<label><input type="checkbox" id="marker_visibile" value="1" checked="checked">表示／非表示</label>
+		<ul id="marker_list"></ul>
+	</div>
+</body>
+</html>

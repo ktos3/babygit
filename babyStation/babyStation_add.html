@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- jQueryの読み込み -->
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+<!-- RDFmgrの読み込み -->
+<script type="text/javascript" src="http://lodcu.cs.chubu.ac.jp:8080/SparqlEPCU/RDFmgr/rdfmgr-2.0.0.js"></script>
+<script type="text/javascript" src="./tos_utilDate.js"></script>
+<script type="text/javascript">
+	//インスタンスの宣言
+	var projid ="babyStation";
+	var rdfmgr = new RDFmgr( projid );
+
+	function goData(){
+		var schema ="@BabyStation,場所名,住所,geo:lat,geo:long,更新日,分野,コメント,注意事項\n" ;
+		var today = new Date();
+
+
+		var author="toshioka";
+
+		var title3	 	= $("#title33").val();
+		var address3	= $("#address33").val();
+
+	    var sToday3 	= date2ymdh( today);
+		var categ3	 	= "授乳場所";
+		var comment3	= $("#comment33").val();
+		var note3 		= $("#note33").val();
+		var glat3		= $("#glat33").val();
+		var glong3 		= $("#glong33").val();
+
+		if( glat3  == undefined || glat3  == "" )	 glat3	=	 35.274017;
+		if( glong3 == undefined || glong3 == "")	 glong3 =	137.013765;
+
+		schema += title3;
+		schema +=   ","+address3;
+		schema +=   ","+glat3;
+		schema +=   ","+glong3;
+		schema +=   ","+sToday3;
+		schema +=   ","+categ3;
+		schema +=   ","+comment3;
+		schema +=   ","+note3;
+		console.log(schema);
+
+		//insertInstance()でCSV形式のデータをSparqlEPCUに送信
+		rdfmgr.insertInstance({
+			rdfdata: schema,
+			success:function(){
+				alert("EPCUに登録しました。");
+			},
+			error: getErrorMsg,
+			overwrite: false
+		});
+
+	}
+	function getErrorMsg(eType,eMsg,eInfo){
+		alert(eMsg+"\n\n"+eInfo);
+	}
+</script>
+
+</head>
+<body>
+	<h1>赤ちゃん駅を登録しよう</h1>
+	<a href="index.html">検索へ</a>
+	<form>
+		<table>
+		<tr><td>場所名</td><td><input type="text" id="title33"  size="80" value="" ></td></tr>
+		<tr><td>住所</td><td><input type="text" id="address33"  size="80" value="" ></td></tr>
+
+		</table>
+		緯度<input type="text" id="glat33" size="80">
+		経度<input type="text" id="glong33" size="80">
+<br/><br/>
+		コメント<br>
+		<textarea id="comment33" cols=60 rows=5></textarea>
+		<br>
+<br/>
+		注意事項<br/>
+		<textarea id="note33" cols=60 rows=5></textarea>
+		<br>
+		<input type="button" value="送信" onclick="goData()">
+	</form>
+</body>
+</html>

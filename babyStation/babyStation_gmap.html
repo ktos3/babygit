@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>赤ちゃん駅</title>
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+
+
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&v=3"></script>
+
+<script type="text/javascript" src="http://lodcu.cs.chubu.ac.jp:8080/SparqlEPCU/RDFmgr/rdfmgr-2.0.0.js"></script>
+<script type="text/javascript" src="./js/tos_utilDate.js"></script>
+<script type="text/javascript" src="./js/tos_util_getDataSchema.js"></script>
+<script type="text/javascript">
+
+//---------------------------------------------------------
+$(function(){
+	var sort_dir=1;
+	var rdfmgr;
+
+	//SPARQL実行インスタンスの宣言
+	var projid="babyStation";
+	rdfmgr = new RDFmgr(projid);//rdfserver_project);
+	$("#projid").html("<span>"+ projid+"</span>");
+
+
+	sendSparql(rdfmgr);//最初にサーバーにデータダウンロード要求する
+	//---------------------------------------------------------------------------------------------------
+	function sendSparql(rdfmgr){
+		var stext = "select "+
+				"(?s   as ?id_uri)"+
+				" (?o9 as ?タイトル)"+
+				" (?o3 as ?クラス)"+
+				" (?o7 as ?コメント)"+
+				" (?o9 as ?住所)"+
+				" (?o2 as ?注意事項)"+
+				" (?o4 as ?分野)"+
+				" (?o5 as ?更新日)"+
+				" (?o1 as ?緯度)"+
+				" (?o8 as ?経度)"+
+
+				"where {"+
+				"optional { ?s rdf:type       ?o3 . }"+
+				"optional { ?s lodcu:注意事項 ?o2 . }"+
+				"optional { ?s lodcu:コメント ?o7 . } "+
+				"optional { ?s lodcu:分野     ?o4 . }"+
+				"optional { ?s lodcu:更新日   ?o5 . }"+
+				"optional { ?s geo:lat        ?o1 . }"+
+				"optional { ?s geo:long       ?o8 . }"+
+				"optional { ?s lodcu:住所     ?o9 . }"+
+				"optional { ?s lodcu:場所名   ?oa . }"+
+				"} order by (?o5)"
+				;
+
+		rdfmgr.executeSparql({
+			sparql: stext,
+			inference: false,
+			success: makeTable,
+			error: function (eType,eMsg,eInfo){
+				alert(eMsg+"\n\n"+eInfo);
+			}
+		});
+	}
+	//---------------------------------------------------------------------------------------------------
+	//SparqlEPCUから受け取ったJSONデータをイテレータを使用して取り出して表作成
+	function makeTable(re){
+		var arrKey=[];
+		var oMem=null;
+		var table_header1;
+		var arrObj=[];
+
+		// ヘッダー行の作成
+		var str = new String("<tr style='color:ivory; background-color:teal;'>");
+		str +="<td onclick='deleteInstance(\"aa\")' >"+"</td>";
+		for(var i=1; i<re.getKeyListLength();i++){
+			str += "<td class='sort1' skey='"+re.getKey(i)+"'> "+re.getKey(i)+"</td>";
+			arrKey.push(re.getKey(i));
+		}
+		str += "</tr>";
+		table_header1= str;
+		$("#table1").empty();
+		$("#table1").append(table_header1);// DOM table1に各列タイトルを付加する
+
+		// 各インスタンスデータを取り出しarrObjに格納する
+		while(re.next()){
+			oMem={};
+			var v_uri= re.getValue(0)
+			oMem["id_uri"]=v_uri;
+			for(var i=1; i < re.getLength();i++){
+				oMem[arrKey[i-1]]=re.getValue(i);// objectにfieldとして入れる
+			}
+			for(mmm in oMem) {
+				console.log("oMem["+mmm+"]="+oMem[mmm]);
+			}
+			arrObj.push(oMem);
+		}
+
+		str="";
+		for(j1 in arrObj) {
+			str  +="<tr>";
+			for(var mmm in arrObj[j1]) {
+				str += "<td>"+arrObj[j1][mmm]+"</td>";
+			}
+			str  +="</tr>"
+		}
+		$("#table1").append(str);// DOM table1に付加する
+
+		displayArrObj(arrObj);// 実際の表示関数にデータを渡す
+	}
+	//---------------------------------------------------------------------------------------------------
+	function displayArrObj( arrObj ) {//Obj配列aaaObjをgmap上に表示する
+
+		var str="";
+		var j1;
+		var ooo={};
+		var stationList1=[];
+
+		for(j1 in arrObj) {
+			ooo={};
+			for(var mmm in arrObj[j1]) {
+				console.log(" mmm="+mmm+"="+arrObj[j1][mmm]);
+			}
+			ooo["name"] = arrObj[j1]["タイトル"];
+			ooo["latlng"]=[arrObj[j1]["緯度"], arrObj[j1]["経度"]];//[135,137];
+			stationList1.push(ooo);
+		}
+		show_map(stationList1);
+	}
+});
+//-----------------------ここまでJSロード時の初期設定---------------------------------------------------------------
+
+function show_map(stationList1) {	//地図を表示
+	var mapDiv = document.getElementById("map_canvas");
+	var mapCanvas = new google.maps.Map(mapDiv);
+	mapCanvas.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+
+	//地図上にマーカーを配置していく
+	var bounds = new google.maps.LatLngBounds();
+	var station, i, latlng;
+	for (i in stationList1) {
+		//マーカーを作成
+		station = stationList1[i];
+		latlng = new google.maps.LatLng(station.latlng[0], station.latlng[1]);
+		bounds.extend(latlng);
+		var marker = createMarker(
+			mapCanvas, latlng, station.name
+		);
+
+		//サイドバーのボタンを作成
+		createMarkerButtonOnSideBar(marker);
+	}
+	//マーカーが全て収まるように地図の中心とズームを調整して表示
+	mapCanvas.fitBounds(bounds);
+}
+function createMarker(map, latlng, title) {
+	//マーカーを作成
+	var marker = new google.maps.Marker({
+		position : latlng,
+		map : map,
+		title : title
+	});
+
+	//情報ウィンドウを作成
+	var infoWnd = new google.maps.InfoWindow({
+		content : "<strong>" + title + "</strong>"
+	});
+
+	//マーカーがクリックされたら、情報ウィンドウを表示
+	google.maps.event.addListener(marker, "click", function(){
+		infoWnd.open(map, marker);
+	});
+
+	//marker.visible を mapCanvas.markersVisible に連動する
+	marker.bindTo("visible", marker.getMap(), "markersVisible");
+	return marker;
+}
+function createMarkerButtonOnSideBar(marker) {
+	//サイドバーにマーカ一覧を作る
+	var ul = document.getElementById("marker_list");
+	var li = document.createElement("li");
+	var title = marker.getTitle();
+	li.innerHTML = title;
+	ul.appendChild(li);
+
+	//サイドバーがクリックされたら、マーカーを擬似クリック
+	google.maps.event.addDomListener(li, "click", function(){
+		google.maps.event.trigger(marker, "click");
+	});
+}
+
+//=======================================================================================================
+</script>
+	<style >
+
+html, body {
+	width : 100%;
+	height : 100%;
+	margin : 0;
+}
+
+#map_canvas {
+	width:500px;/*100%;*/
+	height:500px;/*100%;*/
+	background-color: yellow;
+	float:left;
+}
+#side_bar {
+	width:200px;
+	height:200px;
+	float: left;
+}
+ul#marker_list {
+	list-style-type: none;
+	padding:0;
+}
+
+#marker_list li {
+	cursor: pointer;
+	margin: 5px;
+	border: 1px solid #888;
+	padding: 5px;
+	font-size: 75%;
+}
+
+	</style>
+</head>
+<body>
+	<div>
+    <table id="disp111"  ></table>
+    <table id="dispCate"  ></table>
+
+	<h1>赤ちゃん駅</h1>
+	<h5>projectID : <span id="projid"></span></h5>
+
+	<table style="border-collapse: collapse" border="1"  id="table1"></table>
+
+	<div id="map_canvas"></div>
+	<div id="side_bar">
+		<ul id="marker_list"></ul>
+	</div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+<script type="text/javascript" src="http://lodcu.cs.chubu.ac.jp:8080/SparqlEPCU/RDFmgr/rdfmgr-1.0.0.js"></script>
+<style type="text/css" >
+
+/*
+body *{
+	line-height:1.0;
+	*/
+/*	color:ivory;
+	width:200px;
+	background:dodgerblue;
+	border:2px solid white;
+	*/ /*
+	font-size:small;
+}*/
+
+tr {
+	line-height:1.0;
+}
+
+tr * {
+	line-height:1.0;
+}
+table {
+ 	border:1px black solid;
+ /*width:200px;
+ height:150px;*/
+ }
+
+ td {
+ 	height: 0.5em;
+ }
+
+</style>
+
+<script type="text/javascript">
+	$(function(){
+		executeSparql();
+	});
+
+	//インスタンスの宣言
+	var rdfmgr = new RDFmgr("babyStation");//rdfserver_project);
+
+	//updateInstance()でRDFインスタンスの編集・更新を行う
+	function updateInstance(){
+		rdfmgr.updateInstance({
+			success:executeSparql,
+			error:getErrorMsg,
+			subject: $("#sub").val(),
+			predicate: $("#pre").val(),
+			object: $("#obj").val()
+		});
+	}
+	//deleteInstance()でRDFインスタンスの削除を行う
+	function deleteInstance(){
+		rdfmgr.deleteInstance({
+			success:executeSparql,
+			error:getErrorMsg,
+			subject: $("#delsub").val()
+		});
+	}
+
+	//deleteInstance()でRDFインスタンスの削除を行う
+	function deleteAAA( subj){
+		rdfmgr.deleteInstance({
+			success:executeSparql,
+			error:getErrorMsg,
+			subject: subj
+		});
+	}
+
+
+	//executeSparql()でSPARQL検索を行う
+	function executeSparql(){
+		rdfmgr.executeSparql({
+			success: maketable,
+			error: getErrorMsg,
+			inference:false,
+			sparql: "select (?s as ?インスタンスURI) (?p as ?属性) (?o2 as ?属性値) where{?s rdf:type ?o . ?s ?p ?o2 . }"
+		});
+	}
+	function maketable(re){
+		var jj=0;
+		var prev_s="";
+		$("#disp").empty();
+		var str = new String("<tr>");
+		for(var i=0; i<re.getKeyListLength();i++){
+			str += "<td>"+re.getKey(i)+"</td>";
+		}
+		str += "</tr>";
+		while(re.next()){
+			for(var i=0; i < re.getLength();i++){// i: 列番号
+				if(re.getValue(i)==prev_s) {
+					str += "<td></td>";
+				} else {
+					if(i==0) {//最初の列でURIが在る場合
+						str += "<td class='xxxyyy' id='aa"+jj+"'>"+re.getValue(i)+"</td>";
+						jj++;
+					} else {
+						str += "<td>"+re.getValue(i)+"</td>";
+					}
+				}
+			}
+			str += "</tr>";
+			prev_s=re.getValue(0);
+		}
+		$("#disp").append(str);
+		$(".xxxyyy").click( function() {
+			var tt1= $(this).text();
+			deleteAAA( tt1 );
+		});
+	}
+	function getErrorMsg(eType,eMsg,eInfo){
+		alert(eMsg+"\n\n"+eInfo);
+	}
+</script>
+</head>
+<body>
+	<h1>インスタンスの削除</h1>
+	<h2>インスタンスURIをクリックすると、所有する属性値もあわせて削除することが出来ます</h2>
+	<table   style="border-collapse: collapse" border=1 id="disp"></table>
+	<br>
+
+</body>
+</html>
