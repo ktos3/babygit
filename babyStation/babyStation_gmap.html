@@ -19,7 +19,9 @@ $(function(){
 	var rdfmgr;
 
 	//SPARQL実行インスタンスの宣言
-	var projid="babyStation";
+	var projid=
+		//"notes3";
+		"babyStation";
 	rdfmgr = new RDFmgr(projid);//rdfserver_project);
 	$("#projid").html("<span>"+ projid+"</span>");
 
@@ -31,24 +33,24 @@ $(function(){
 				"(?s   as ?id_uri)"+
 				" (?o9 as ?タイトル)"+
 				" (?o3 as ?クラス)"+
-				" (?o7 as ?コメント)"+
-				" (?o9 as ?住所)"+
-				" (?o2 as ?注意事項)"+
-				" (?o4 as ?分野)"+
-				" (?o5 as ?更新日)"+
+				" (?o7 as ?受入可能年齢)"+
+				" (?oa as ?住所)"+
+				" (?o2 as ?類型)"+
+				" (?o4 as ?預入)"+
+				" (?o5 as ?引取り)"+
 				" (?o1 as ?緯度)"+
 				" (?o8 as ?経度)"+
 
 				"where {"+
 				"optional { ?s rdf:type       ?o3 . }"+
-				"optional { ?s lodcu:注意事項 ?o2 . }"+
-				"optional { ?s lodcu:コメント ?o7 . } "+
-				"optional { ?s lodcu:分野     ?o4 . }"+
-				"optional { ?s lodcu:更新日   ?o5 . }"+
+				"optional { ?s lodcu:施設の類型 ?o2 . }"+
+				"optional { ?s lodcu:受入可能年齢 ?o7 . } "+
+				"optional { ?s lodcu:預入開始_平日 ?o4 . }"+
+				"optional { ?s lodcu:引き取り終了_平日  ?o5 . }"+
 				"optional { ?s geo:lat        ?o1 . }"+
 				"optional { ?s geo:long       ?o8 . }"+
-				"optional { ?s lodcu:住所     ?o9 . }"+
-				"optional { ?s lodcu:場所名   ?oa . }"+
+				"optional { ?s lodcu:タイトル ?o9 . }"+  // 住所
+				"optional { ?s lodcu:所在地   ?oa . }"+
 				"} order by (?o5)"
 				;
 
@@ -57,7 +59,7 @@ $(function(){
 			inference: false,
 			success: makeTable,
 			error: function (eType,eMsg,eInfo){
-				alert(eMsg+"\n\n"+eInfo);
+				alert(eMsg+"\n\n"+eInfo+"-->"+ stext);
 			}
 		});
 	}
