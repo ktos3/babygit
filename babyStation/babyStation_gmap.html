@@ -71,17 +71,16 @@ $(function(){
 		var table_header1;
 		var arrObj=[];
 
+		$("#table1").empty();
+
 		// ヘッダー行の作成
-		var str = new String("<tr style='color:ivory; background-color:teal;'>");
-		str +="<td onclick='deleteInstance(\"aa\")' >"+"</td>";
+		var str = "<tr>";
+		str +="<th class='key' onclick='deleteInstance(\"aa\")' >"+"</th>";
 		for(var i=1; i<re.getKeyListLength();i++){
-			str += "<td class='sort1' skey='"+re.getKey(i)+"'> "+re.getKey(i)+"</td>";
+			str += "<th class='sort1' skey='"+re.getKey(i)+"'> "+re.getKey(i)+"</th>";
 			arrKey.push(re.getKey(i));
 		}
 		str += "</tr>";
-		table_header1= str;
-		$("#table1").empty();
-		$("#table1").append(table_header1);// DOM table1に各列タイトルを付加する
 
 		// 各インスタンスデータを取り出しarrObjに格納する
 		while(re.next()){
@@ -97,7 +96,6 @@ $(function(){
 			arrObj.push(oMem);
 		}
 
-		str="";
 		for(j1 in arrObj) {
 			str  +="<tr>";
 			for(var mmm in arrObj[j1]) {
@@ -105,6 +103,7 @@ $(function(){
 			}
 			str  +="</tr>"
 		}
+
 		$("#table1").append(str);// DOM table1に付加する
 
 		displayArrObj(arrObj);// 実際の表示関数にデータを渡す
@@ -208,7 +207,8 @@ html, body {
 }
 #side_bar {
 	width:200px;
-	height:200px;
+	height:500px;
+	overflow: auto;
 	float: left;
 }
 ul#marker_list {
@@ -224,6 +224,34 @@ ul#marker_list {
 	font-size: 75%;
 }
 
+#table1  {
+	width: 90%;
+	height:50px;
+	overflow-y: auto;
+	border-collapse: collapse;
+}
+
+#table1 th,td {
+	border: 1px solid #000;
+}
+/*
+#table1 thead,tbody {
+	display: block;
+}
+
+#table1 tbody {
+	overflow-y: scroll;
+	height: 500px;
+}
+
+.key, .value {
+    width: 100px;
+}
+*/
+#ttt1 {
+	height: 150px;
+	overflow: scroll;
+}
 	</style>
 </head>
 <body>
@@ -234,7 +262,9 @@ ul#marker_list {
 	<h1>赤ちゃん駅</h1>
 	<h5>projectID : <span id="projid"></span></h5>
 
-	<table style="border-collapse: collapse" border="1"  id="table1"></table>
+	<div id="ttt1">
+	<table id="table1"></table>
+	</div>
 
 	<div id="map_canvas"></div>
 	<div id="side_bar">
