@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<style type="text/css">
+html, body {
+	width : 100%;
+	height : 100%;
+	margin : 0;
+}
+#map_canvas {
+	width:100%;
+	height:100%;
+}
+</style>
+<script type="text/javascript">
+window.onload= function () {
+	//----------------------------------------------------------------------------------------
+	// 基本は、latlng,optionを用意して google.maps.Mapをnewして地図を表示する。DOMの表示対象のブロックmap_canvasの指定が必要
+	// 上記のstyle指定も必要
+	//----------------------------------------------------------------------------------------
+	var latlng = new google.maps.LatLng(35.275, 137.015);
+	var myOptions = {
+			zoom: 10,//14,
+			center: latlng,
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+	var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+	var geocoder = new google.maps.Geocoder();
+	var aaa =[/*
+'名古屋市瑞穂区洲山町３－４４',
+'名古屋市千種区豊年町15-12'
+*/
+/*
+'千種区橋本町3-4',
+'千種区汁谷町39',
+'千種区星ケ丘一丁目23-7',
+'千種区北千種二丁目1-2',
+'千種区宮根台二丁目9-12',
+'千種区振甫町3-34',
+'千種区豊年町3-18',*/
+/*
+'千種区春里町2-12-4',
+'千種区千代田橋二丁目5-12',
+'千種区下方町3-3-1',
+'千種区富士見台1-22',
+'千種区仁座町120'
+*/
+/*
+'千種区桐林町1-5',
+'千種区今池南12-3',
+'千種区新池町4-3-3',
+'千種区今池南12-6',
+'千種区山添町1-75-2',
+'千種区希望ヶ丘二丁目3-28'
+*/
+/*
+'千種区清明山一丁目1-3',
+'千種区大島町3-48-2',
+'千種区宮根台一丁目1-17',
+'千種区川崎町1-51',
+'千種区汁谷町7',
+'千種区春岡二丁目5-9'
+*/
+
+/*
+'千種区猫洞通4-25-1',
+'千種区宮根台一丁目5-6',
+'千種区園山町一丁目18-4',
+'千種区星が丘元町3-6',
+'千種区千種通七丁目25-1',
+'千種区山添町2丁目2',
+'千種区京命一丁目8-25'
+*/
+
+'千種区霞ヶ丘2-5-3',
+'千種区北千種三丁目2',
+'千種区若水二丁目2',
+'千種区内山二丁目11番21号',
+'千種区春岡1丁目2番7号',
+'千種区吹上一丁目2番15号'
+	          ];
+	var k=0;
+	for(var i in aaa) {
+		var address = "名古屋市"+aaa[i];
+		console.log(""+k+" 住所 "+address);
+		geocoder.geocode(  { address: address }, showResults );
+		k++;
+	}
+
+	/*
+	var address= '名古屋市瑞穂区洲山町３－４４';
+	console.log("住所 "+address);
+	geocoder.geocode(  { address: address }, showResults );
+	*/
+
+
+
+
+}
+
+function showResults (results, status) {
+	if( status == google.maps.GeocoderStatus.OK )
+    {
+		var geolat	=results[ 0 ].geometry.location.lat();
+		var geolng	=results[ 0 ].geometry.location.lng();
+
+		console.log("緯度 "+geolat);
+		console.log("経度 "+geolng);
+    }
+    else
+    {
+        alert( 'Faild：' + status );
+    }
+
+
+
+}
+
+
+</script>
+
+</head>
+
+<body>
+	<div id="map_canvas" style="width:100%; height:80%"></div>
+</body>
+
+</html>

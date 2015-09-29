@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<style type="text/css">
+html, body {
+	width : 100%;
+	height : 100%;
+	margin : 0;
+}
+#map_canvas {
+	width:100%;
+	height:100%;
+}
+</style>
+<script type="text/javascript">
+window.onload= function () {
+	//----------------------------------------------------------------------------------------
+	// 基本は、latlng,optionを用意して google.maps.Mapをnewして地図を表示する。DOMの表示対象のブロックmap_canvasの指定が必要
+	// 上記のstyle指定も必要
+	//----------------------------------------------------------------------------------------
+	var latlng = new google.maps.LatLng(35.275, 137.015);
+	var myOptions = {
+			zoom: 10,//14,
+			center: latlng,
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+	var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+	var geocoder = new google.maps.Geocoder();
+	var address= '名古屋市瑞穂区洲山町３－４４';
+
+	geocoder.geocode(
+	    { address: address/*'tokyo'*/ },
+	    function( results, status )
+	    {
+	        if( status == google.maps.GeocoderStatus.OK )
+	        {
+				var geolat	=results[ 0 ].geometry.location.lat();
+				var geolng	=results[ 0 ].geometry.location.lng();
+				console.log("住所 "+address);
+				console.log("緯度 "+geolat);
+				console.log("経度 "+geolng);
+	        	var latlng = new google.maps.LatLng(geolat, geolng);
+	        	var myOptions = {
+	        			zoom: 10,//14,
+	        			center: latlng,
+	        			mapTypeId: google.maps.MapTypeId.ROADMAP
+	        	};
+	        	var mapCanvas = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
+	        	// マーカーを生成
+	        	var mXXX = createMarker(
+	        		mapCanvas,								// canvasを指定
+	        		new google.maps.LatLng(geolat,geolng),// 緯度軽度を指定
+	        		"<strong>たんぽぽ保育園</strong><br/>"+
+	        		"24時間緊急一時保育<br/>"+
+	        		"<a href='javascript:void(0)' onclick='javascript:window.open(\"http://www.city.nagoya.jp/kodomoseishonen/page/0000048624.html\");'>詳細</a>"+
+	        		"<br/>名古屋市瑞穂区洲山町３－４４<br/>"	// マーカーのラベルを指定
+	        	);
+	        }
+	        else
+	        {
+	            alert( 'Faild：' + status );
+	        }
+	    } );
+}
+
+//マーカー作成サービスを行う関数
+function createMarker(map, latlng, msg) {
+	//マーカーを作成
+	var marker = new google.maps.Marker();
+	marker.setPosition(latlng);
+	marker.setMap(map);
+
+	//情報ウィンドウを作成
+	var infoWnd = new google.maps.InfoWindow();
+	infoWnd.setContent(msg);
+
+	//マーカーがクリックされたら、情報ウィンドウを表示
+	google.maps.event.addListener(marker, "click", function(){
+		infoWnd.open(map, marker);
+	});
+	return marker;
+}
+
+</script>
+
+</head>
+
+<body>
+	<div id="map_canvas" style="width:100%; height:80%"></div>
+</body>
+
+</html>
