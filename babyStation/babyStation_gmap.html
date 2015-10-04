@@ -123,6 +123,10 @@ $(function(){
 			}
 			ooo["name"] = arrObj[j1]["タイトル"];
 			ooo["latlng"]=[arrObj[j1]["緯度"], arrObj[j1]["経度"]];//[135,137];
+
+			ooo["ruikei"]=arrObj[j1]["類型"];
+			ooo["azukeire"]=arrObj[j1]["預入"];
+			ooo["hikitori"]=arrObj[j1]["引取り"];
 			stationList1.push(ooo);
 		}
 		show_map(stationList1);
@@ -144,7 +148,7 @@ function show_map(stationList1) {	//地図を表示
 		latlng = new google.maps.LatLng(station.latlng[0], station.latlng[1]);
 		bounds.extend(latlng);
 		var marker = createMarker(
-			mapCanvas, latlng, station.name
+			mapCanvas, latlng, station
 		);
 
 		//サイドバーのボタンを作成
@@ -153,18 +157,20 @@ function show_map(stationList1) {	//地図を表示
 	//マーカーが全て収まるように地図の中心とズームを調整して表示
 	mapCanvas.fitBounds(bounds);
 }
-function createMarker(map, latlng, title) {
+function createMarker(map, latlng, station) {
 	//マーカーを作成
 	var marker = new google.maps.Marker({
 		position : latlng,
 		map : map,
 		icon : new google.maps.MarkerImage("icon/dot8.ico"),
-		title : title
+		title : station.name
 	});
 
 	//情報ウィンドウを作成
 	var infoWnd = new google.maps.InfoWindow({
-		content : "<strong>" + title + "</strong>"
+		content :	"<strong>" + station.name + "</strong><br/>"
+					+station.azukeire+"～"
+					+station.hikitori+"<br/>"
 	});
 
 	//マーカーがクリックされたら、情報ウィンドウを表示
