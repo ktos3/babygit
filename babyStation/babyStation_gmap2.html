@@ -35,7 +35,7 @@ $(function(){
 				" (?o3 as ?クラス)"+
 				" (?o7 as ?トイレ)"+//受入可能年齢
 				" (?oa as ?住所)"+
-				" (?o2 as ?類型)"+
+//				" (?o2 as ?類型)"+
 				" (?o4 as ?アクセス)"+
 				" (?o5 as ?子供用トイレ)"+
 				" (?o1 as ?緯度)"+
@@ -60,7 +60,7 @@ $(function(){
 				"optional { ?s geo:lat        ?o1 . }"+
 				"optional { ?s geo:long       ?o8 . }"+
 				"optional { ?s lodcu:title ?o9 . }"+  // 住所
-				"optional { ?s lodcu:所在地   ?oa . }"+
+				"optional { ?s lodcu:住所   ?oa . }"+
 				"optional { ?s lodcu:授乳   ?ob . }"+
 				"optional { ?s lodcu:URL ?oc . }"+
 				"optional { ?s lodcu:妊婦休憩 ?od . }"+
@@ -125,42 +125,9 @@ $(function(){
 
 		$("#table1").append(str);// DOM table1に付加する
 
-		displayArrObj(arrObj);// 実際の表示関数にデータを渡す
+		show_map(arrObj/*stationList1*/);
 	}
-	//---------------------------------------------------------------------------------------------------
-	function displayArrObj( arrObj ) {//Obj配列aaaObjをgmap上に表示する
 
-		var str="";
-		var j1;
-		var ooo={};
-		var stationList1=[];
-
-		for(j1 in arrObj) {
-			ooo={};
-			for(var mmm in arrObj[j1]) {
-				//console.log(" mmm="+mmm+"="+arrObj[j1][mmm]);
-			}
-			ooo["name"] = arrObj[j1]["タイトル"];
-			ooo["latlng"]=[arrObj[j1]["緯度"], arrObj[j1]["経度"]];//[135,137];
-
-			ooo["url"]=arrObj[j1]["URL"];
-
-			ooo["ruikei"]=arrObj[j1]["クラス"];
-			ooo["access"]=arrObj[j1]["アクセス"];
-			ooo["toire"]=arrObj[j1]["トイレ"];
-			ooo["junyuu"]=arrObj[j1]["授乳"];//開始年齢
-			ooo["kodomotoire"]=arrObj[j1]["子供用トイレ"];
-			ooo["ninnpukyuukei"]=arrObj[j1]["妊婦休憩"];
-			ooo["shutai"]=arrObj[j1]["設置主体"];
-			ooo["tel"]=arrObj[j1]["TEL"];
-			ooo["omutsu"]=arrObj[j1]["おむつ替え"];//公民
-			ooo["jikantai"]=arrObj[j1]["時間帯"];
-			ooo["parking"]=arrObj[j1]["駐車場"];
-			ooo["addenda"]=arrObj[j1]["備考"];
-			stationList1.push(ooo);
-		}
-		show_map(stationList1);
-	}
 });
 //-----------------------ここまでJSロード時の初期設定---------------------------------------------------------------
 
@@ -174,9 +141,9 @@ function show_map(stationList1) {	//地図を表示
 	var station, i, latlng;
 	for (i in stationList1) {
 		//マーカーを作成
-		console.log("zzzzzzzzzzzzzzz     "+stationList1[i].latlng[0]);
 		station = stationList1[i];
-		latlng = new google.maps.LatLng(station.latlng[0], station.latlng[1]);
+
+		latlng = new google.maps.LatLng(station["緯度"],station["経度"]);
 		bounds.extend(latlng);
 		var marker = createMarker(
 			mapCanvas, latlng, station
@@ -189,7 +156,7 @@ function show_map(stationList1) {	//地図を表示
 	mapCanvas.fitBounds(bounds);
 
 	google.maps.event.addListener(mapCanvas, 'zoom_changed', function() {
-		console.log("@@@@@@@@@@@@@@@@@@@@@  zoom changed!! "+mapCanvas.getZoom() );// 実行したい処理
+		//console.log("@@@@@@@@@@@@@@@@@@@@@  zoom changed!! "+mapCanvas.getZoom() );// 実行したい処理
 	});
 }
 function createMarker(map, latlng, station) {
@@ -200,27 +167,24 @@ function createMarker(map, latlng, station) {
 		map : map,
 		icon : 	new google.maps.MarkerImage("icon/dot1.png"),//("icon/dot8.ico"),
 						//iconz,//icon1, //
-		title : station.name
+		title : station["タイトル"]
 	});
 
+	var ss2=	"<span style='font-weight:900'>" + station["タイトル"] + "</span><br/>"
 
+	for(kk in station) {
+		if(kk == "タイトル" || kk=="緯度" || kk=="経度" || kk=="id_uri") continue;
+		if(kk=="URL") {
+			ss2 += "<a href='"+station["URL"]+"'>web page</a><br/>"
+		} else {
+			ss2 += kk+"："+station[kk]+"<br/>";
+		}
+//		console.log("yyy "+kk);
+	}
 
 	//情報ウィンドウを作成
 	var infoWnd = new google.maps.InfoWindow({
-		content :	"<span style='font-weight:900'>" + station.name + "</span><br/>"
-					+"アクセス："+station.access+"<br/>"
-					+"クラス："+station.ruikei+"<br/>"
-					+"設置："+station.shutai+"<br/>"
-					+"<a href='"+station.url+"'>web page</a><br/>"
-					+"授乳："+station.junyuu+"<br/>"
-					+"おむつ替え："+station.omutsu+"<br/>"
-					+"妊婦休憩："+station.ninnpukyuukei+"<br/>"
-					+"トイレ："+station.toire+"<br/>"
-					+"子供用トイレ："+station.kodomotoire+"<br/>"
-					+"TEL："+station.tel+"<br/>"
-					+"駐車場："+station.parking+"<br/>"
-					+"時間帯："+station.jikantai+"<br/>"
-					+"備考："+station.addenda+"<br/>"
+		content : ss2
 	});
 
 	//マーカーがクリックされたら、情報ウィンドウを表示
