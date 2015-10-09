@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>赤ちゃん駅</title>
+<title>保育所</title>
 <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
 
 
@@ -21,10 +21,10 @@ $(function(){
 	//SPARQL実行インスタンスの宣言
 	var projid=
 		//"notes3";
-		"babyStation";
+		//"babyStation";
+		"test_toshioka";
 	rdfmgr = new RDFmgr(projid);//rdfserver_project);
 	$("#projid").html("<span>"+ projid+"</span>");
-
 
 	sendSparql(rdfmgr);//最初にサーバーにデータダウンロード要求する
 	//---------------------------------------------------------------------------------------------------
@@ -33,24 +33,42 @@ $(function(){
 				"(?s   as ?id_uri)"+
 				" (?o9 as ?タイトル)"+
 				" (?o3 as ?クラス)"+
-				" (?o7 as ?受入可能年齢)"+
+				" (?ob as ?授乳)"+
+				" (?og as ?おむつ替え)"+
+				" (?o7 as ?トイレ)"+
+				" (?o5 as ?子供用トイレ)"+
+				" (?od as ?妊婦休憩)"+
+				" (?oe as ?設置主体)"+
 				" (?oa as ?住所)"+
-				" (?o2 as ?類型)"+
-				" (?o4 as ?預入)"+
-				" (?o5 as ?引取り)"+
+//				" (?o2 as ?類型)"+
+				" (?o4 as ?アクセス)"+
 				" (?o1 as ?緯度)"+
 				" (?o8 as ?経度)"+
+				" (?oc as ?URL)"+
+				" (?of as ?TEL)"+
+					" (?oh as ?時間帯)"+
+				" (?oi as ?駐車場)"+
+				" (?oj as ?備考)"+
 
 				"where {"+
 				"optional { ?s rdf:type       ?o3 . }"+
 				"optional { ?s lodcu:施設の類型 ?o2 . }"+
-				"optional { ?s lodcu:受入可能年齢 ?o7 . } "+
-				"optional { ?s lodcu:預入開始_平日 ?o4 . }"+
-				"optional { ?s lodcu:引き取り終了_平日  ?o5 . }"+
+				"optional { ?s lodcu:トイレ ?o7 . } "+
+				"optional { ?s lodcu:アクセス ?o4 . }"+
+				"optional { ?s lodcu:子供用トイレ  ?o5 . }"+
 				"optional { ?s geo:lat        ?o1 . }"+
 				"optional { ?s geo:long       ?o8 . }"+
-				"optional { ?s lodcu:タイトル ?o9 . }"+  // 住所
-				"optional { ?s lodcu:所在地   ?oa . }"+
+				"optional { ?s lodcu:title ?o9 . }"+
+				"optional { ?s lodcu:住所   ?oa . }"+
+				"optional { ?s lodcu:授乳   ?ob . }"+
+				"optional { ?s lodcu:URL ?oc . }"+
+				"optional { ?s lodcu:妊婦休憩 ?od . }"+
+				"optional { ?s lodcu:設置主体 ?oe . }"+
+				"optional { ?s lodcu:TEL ?of . }"+
+				"optional { ?s lodcu:おむつ替え ?og . }"+
+				"optional { ?s lodcu:駐車場 ?oi . }"+
+				"optional { ?s lodcu:時間帯 ?oh . }"+
+				"optional { ?s lodcu:備考 ?oj . }"+
 				"} order by (?o5)"
 				;
 
@@ -106,31 +124,9 @@ $(function(){
 
 		$("#table1").append(str);// DOM table1に付加する
 
-		displayArrObj(arrObj);// 実際の表示関数にデータを渡す
+		show_map(arrObj/*stationList1*/);
 	}
-	//---------------------------------------------------------------------------------------------------
-	function displayArrObj( arrObj ) {//Obj配列aaaObjをgmap上に表示する
 
-		var str="";
-		var j1;
-		var ooo={};
-		var stationList1=[];
-
-		for(j1 in arrObj) {
-			ooo={};
-			for(var mmm in arrObj[j1]) {
-				console.log(" mmm="+mmm+"="+arrObj[j1][mmm]);
-			}
-			ooo["name"] = arrObj[j1]["タイトル"];
-			ooo["latlng"]=[arrObj[j1]["緯度"], arrObj[j1]["経度"]];//[135,137];
-
-			ooo["ruikei"]=arrObj[j1]["類型"];
-			ooo["azukeire"]=arrObj[j1]["預入"];
-			ooo["hikitori"]=arrObj[j1]["引取り"];
-			stationList1.push(ooo);
-		}
-		show_map(stationList1);
-	}
 });
 //-----------------------ここまでJSロード時の初期設定---------------------------------------------------------------
 
@@ -145,7 +141,8 @@ function show_map(stationList1) {	//地図を表示
 	for (i in stationList1) {
 		//マーカーを作成
 		station = stationList1[i];
-		latlng = new google.maps.LatLng(station.latlng[0], station.latlng[1]);
+
+		latlng = new google.maps.LatLng(station["緯度"],station["経度"]);
 		bounds.extend(latlng);
 		var marker = createMarker(
 			mapCanvas, latlng, station
@@ -156,32 +153,55 @@ function show_map(stationList1) {	//地図を表示
 	}
 	//マーカーが全て収まるように地図の中心とズームを調整して表示
 	mapCanvas.fitBounds(bounds);
+
+	google.maps.event.addListener(mapCanvas, 'zoom_changed', function() {
+		//console.log("@@@@@@@@@@@@@@@@@@@@@  zoom changed!! "+mapCanvas.getZoom() );// 実行したい処理
+	});
 }
 function createMarker(map, latlng, station) {
 	//マーカーを作成
+
 	var marker = new google.maps.Marker({
 		position : latlng,
 		map : map,
-		icon : new google.maps.MarkerImage("icon/dot8.ico"),
-		title : station.name
+		icon : 	new google.maps.MarkerImage("icon/dot1.png"),//("icon/dot8.ico"),
+						//iconz,//icon1, //
+		title : station["タイトル"]
 	});
+
+	var ss2=	"<span style='font-weight:900'>" + station["タイトル"] + "</span><br/>"
+
+	for(kk in station) {
+		if(kk == "タイトル" || kk=="緯度" || kk=="経度" || kk=="id_uri") continue;
+		if(kk=="URL") {
+			ss2 += "<a href='"+station["URL"]+"'  target='_blank'    >web page</a><br/>"
+		} else {
+			ss2 += kk+"："+station[kk]+"<br/>";
+		}
+	}
+
+	ss2 += "<img src='picture/IMG_0532.JPG' width='50px' height='50px'>";// 写真を表示する  テスト中
 
 	//情報ウィンドウを作成
 	var infoWnd = new google.maps.InfoWindow({
-		content :	"<strong>" + station.name + "</strong><br/>"
-					+station.azukeire+"～"
-					+station.hikitori+"<br/>"
+		content : ss2
 	});
 
 	//マーカーがクリックされたら、情報ウィンドウを表示
 	google.maps.event.addListener(marker, "click", function(){
+
+		if(currentInfoWindow){currentInfoWindow.close();}
 		infoWnd.open(map, marker);
+		currentInfoWindow = infoWnd;
 	});
 
 	//marker.visible を mapCanvas.markersVisible に連動する
 	marker.bindTo("visible", marker.getMap(), "markersVisible");
 	return marker;
 }
+
+var currentInfoWindow = null;
+
 function createMarkerButtonOnSideBar(marker) {
 	//サイドバーにマーカ一覧を作る
 	var ul = document.getElementById("marker_list");
@@ -207,13 +227,13 @@ html, body {
 }
 
 #map_canvas {
-	width:500px;/*100%;*/
+	width:84%;/*500px;*//*100%;*/
 	height:500px;/*100%;*/
 	background-color: yellow;
 	float:left;
 }
 #side_bar {
-	width:200px;
+	width:15%;/*200px;*/
 	height:500px;
 	overflow: auto;
 	float: left;
@@ -232,31 +252,23 @@ ul#marker_list {
 }
 
 #table1  {
+	margin: 15px;
+	padding: 10px;
 	width: 90%;
 	height:50px;
-	overflow-y: auto;
+	overflow-y: scroll;
+	border: 1px solid #000;
 	border-collapse: collapse;
 }
 
 #table1 th,td {
 	border: 1px solid #000;
 }
-/*
-#table1 thead,tbody {
-	display: block;
-}
 
-#table1 tbody {
-	overflow-y: scroll;
-	height: 500px;
-}
-
-.key, .value {
-    width: 100px;
-}
-*/
 #ttt1 {
+	margin: 20px;
 	height: 150px;
+	border: 1px solid #000;
 	overflow: scroll;
 }
 	</style>
@@ -266,13 +278,14 @@ ul#marker_list {
     <table id="disp111"  ></table>
     <table id="dispCate"  ></table>
 
-	<h1>赤ちゃん駅</h1>
+	<h1>名古屋市 赤ちゃんの駅 </h1>
 	<h5>projectID : <span id="projid"></span></h5>
 
 	<div id="ttt1">
 	<table id="table1"></table>
 	</div>
 
+<div>
 	<div id="map_canvas"></div>
 	<div id="side_bar">
 		<ul id="marker_list"></ul>
