@@ -33,40 +33,39 @@ $(function(){
 				"(?s   as ?id_uri)"+
 				" (?o9 as ?タイトル)"+
 				" (?o3 as ?クラス)"+
-				" (?o7 as ?トイレ)"+//受入可能年齢
+				" (?ob as ?授乳)"+
+				" (?og as ?おむつ替え)"+
+				" (?o7 as ?トイレ)"+
+				" (?o5 as ?子供用トイレ)"+
+				" (?od as ?妊婦休憩)"+
+				" (?oe as ?設置主体)"+
 				" (?oa as ?住所)"+
 //				" (?o2 as ?類型)"+
 				" (?o4 as ?アクセス)"+
-				" (?o5 as ?子供用トイレ)"+
 				" (?o1 as ?緯度)"+
 				" (?o8 as ?経度)"+
-				" (?ob as ?授乳)"+// 開始年齢
 				" (?oc as ?URL)"+
-				" (?od as ?妊婦休憩)"+//定員
-				" (?oe as ?設置主体)"+
 				" (?of as ?TEL)"+
-				" (?og as ?おむつ替え)"+
-				" (?oh as ?時間帯)"+
+					" (?oh as ?時間帯)"+
 				" (?oi as ?駐車場)"+
 				" (?oj as ?備考)"+
-
 
 				"where {"+
 				"optional { ?s rdf:type       ?o3 . }"+
 				"optional { ?s lodcu:施設の類型 ?o2 . }"+
-				"optional { ?s lodcu:トイレ ?o7 . } "+      //  受入可能年齢
+				"optional { ?s lodcu:トイレ ?o7 . } "+
 				"optional { ?s lodcu:アクセス ?o4 . }"+
-				"optional { ?s lodcu:子供用トイレ  ?o5 . }"+//引き取り終了_平日
+				"optional { ?s lodcu:子供用トイレ  ?o5 . }"+
 				"optional { ?s geo:lat        ?o1 . }"+
 				"optional { ?s geo:long       ?o8 . }"+
-				"optional { ?s lodcu:title ?o9 . }"+  // 住所
+				"optional { ?s lodcu:title ?o9 . }"+
 				"optional { ?s lodcu:住所   ?oa . }"+
 				"optional { ?s lodcu:授乳   ?ob . }"+
 				"optional { ?s lodcu:URL ?oc . }"+
 				"optional { ?s lodcu:妊婦休憩 ?od . }"+
 				"optional { ?s lodcu:設置主体 ?oe . }"+
 				"optional { ?s lodcu:TEL ?of . }"+
-				"optional { ?s lodcu:おむつ替え ?og . }"+//公民
+				"optional { ?s lodcu:おむつ替え ?og . }"+
 				"optional { ?s lodcu:駐車場 ?oi . }"+
 				"optional { ?s lodcu:時間帯 ?oh . }"+
 				"optional { ?s lodcu:備考 ?oj . }"+
@@ -175,12 +174,13 @@ function createMarker(map, latlng, station) {
 	for(kk in station) {
 		if(kk == "タイトル" || kk=="緯度" || kk=="経度" || kk=="id_uri") continue;
 		if(kk=="URL") {
-			ss2 += "<a href='"+station["URL"]+"'>web page</a><br/>"
+			ss2 += "<a href='"+station["URL"]+"'  target='_blank'    >web page</a><br/>"
 		} else {
 			ss2 += kk+"："+station[kk]+"<br/>";
 		}
-//		console.log("yyy "+kk);
 	}
+
+	ss2 += "<img src='picture/IMG_0532.JPG' width='50px' height='50px'>";// 写真を表示する  テスト中
 
 	//情報ウィンドウを作成
 	var infoWnd = new google.maps.InfoWindow({
@@ -252,9 +252,12 @@ ul#marker_list {
 }
 
 #table1  {
+	margin: 15px;
+	padding: 10px;
 	width: 90%;
 	height:50px;
-	overflow-y: auto;
+	overflow-y: scroll;
+	border: 1px solid #000;
 	border-collapse: collapse;
 }
 
@@ -263,7 +266,9 @@ ul#marker_list {
 }
 
 #ttt1 {
+	margin: 20px;
 	height: 150px;
+	border: 1px solid #000;
 	overflow: scroll;
 }
 	</style>
@@ -273,7 +278,7 @@ ul#marker_list {
     <table id="disp111"  ></table>
     <table id="dispCate"  ></table>
 
-	<h1>名古屋市 赤ちゃんの駅</h1>
+	<h1>名古屋市 赤ちゃんの駅 </h1>
 	<h5>projectID : <span id="projid"></span></h5>
 
 	<div id="ttt1">

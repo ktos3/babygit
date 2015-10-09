@@ -145,6 +145,7 @@ function show_map(stationList1) {	//地図を表示
 	var mapCanvas = new google.maps.Map(mapDiv);
 	mapCanvas.setMapTypeId(google.maps.MapTypeId.ROADMAP);
 
+	arrMarkers = [];
 	//地図上にマーカーを配置していく
 	var bounds = new google.maps.LatLngBounds();
 	var station, i, latlng;
@@ -158,6 +159,7 @@ function show_map(stationList1) {	//地図を表示
 			mapCanvas, latlng, station
 		);
 
+		arrMarkers.push(marker);
 		//サイドバーのボタンを作成
 		createMarkerButtonOnSideBar(marker);
 	}
@@ -166,9 +168,42 @@ function show_map(stationList1) {	//地図を表示
 
 	google.maps.event.addListener(mapCanvas, 'zoom_changed', function() {// zoom が大っ気時は大きいマーカーを表示したい
 		//console.log("@@@@@@@@@@@@@@@@@@@@@  zoom changed!! "+mapCanvas.getZoom() );// 実行したい処理
+		if(mapCanvas.getZoom() >= 14) {
+			if(markerSmall) {
+				for( gg11 in arrMarkers) {
+					mmm111_large(arrMarkers[gg11]);
+				}
+				markerSmall = false;
+			}
+		} else {
+			if(!markerSmall) {
+				for( gg11 in arrMarkers) {
+					mmm111_small(arrMarkers[gg11]);
+				}
+				markerSmall = true;
+			}
+		}
 	});
 }
 
+function mmm111_large( marker3 ) {
+	var mopt2 ={
+			icon : 	new google.maps.MarkerImage("icon/dot1.png"),
+		};
+	marker3.setOptions(mopt2);
+}
+
+function mmm111_small( marker3 ) {
+	var mopt2 ={
+			icon : 	new google.maps.MarkerImage("icon/dot1.ico"),
+		};
+	marker3.setOptions(mopt2);
+}
+
+
+var markerSmall=true;
+
+var arrMarkers=[];
 
 function createMarker(map, latlng, station) {
 	//マーカーを作成
@@ -203,6 +238,12 @@ function createMarker(map, latlng, station) {
 		if(currentInfoWindow){currentInfoWindow.close();}
 		infoWnd.open(map, marker);
 		currentInfoWindow = infoWnd;
+/*
+		var mopt2 ={
+			icon : 	new google.maps.MarkerImage("icon/dot1.png"),
+		};
+		marker.setOptions(mopt2);
+		*/
 	});
 
 	//marker.visible を mapCanvas.markersVisible に連動する
@@ -292,16 +333,16 @@ ul#marker_list {
 </head>
 <body>
 	<div>
-    <table id="disp111"  ></table>
-    <table id="dispCate"  ></table>
+	    <table id="disp111"  ></table>
+   		<table id="dispCate"  ></table>
 
-	<h1>名古屋市 保育所</h1>
-	<h5>projectID : <span id="projid"></span></h5>
+		<h1>名古屋市 保育所</h1>
+		<h5>projectID : <span id="projid"></span></h5>
 
-	<div id="ttt1">
-	<table id="table1"></table>
-	</div>
-	<h2>設置団体区分け</h2>
+		<div id="ttt1">
+			<table id="table1"></table>
+		</div>
+		<h2>設置団体区分け</h2>
 <img src="icon/dot1.ico">名古屋市<br/>
 <img src="icon/dot2.ico">医療法人<br/>
 <img src="icon/dot3.ico">学校法人<br/>
@@ -316,12 +357,13 @@ ul#marker_list {
 <img src="icon/dot9.ico">特定非営利活動法人<br/>
 <img src="icon/dot9.ico">有限会社<br/>
 <img src="icon/dot9.ico">個人<br/>
-<div>
+	</div>
 	<div id="map_canvas"></div>
+
 	<div id="side_bar">
 		<ul id="marker_list"></ul>
 	</div>
-	</div>
+
 
 </body>
 </html>
